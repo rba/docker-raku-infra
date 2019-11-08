@@ -1,0 +1,6 @@
+design.raku.org
+===============
+
+The Dockerfile is basically a port of the util/update-design.perl6.org.sh script from [1].
+
+[1] https://github.com/perl6/mu
