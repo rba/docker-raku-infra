@@ -44,7 +44,9 @@ services:
     init: true
     restart: unless-stopped 
     ports:
-      - 10000:10000
+    - mode: host
+      target: 10000
+      published: 10000
     volumes:
       - "/home/rancher/rakubrew.org/releases:/releases:ro"
     depends_on:
