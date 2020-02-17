@@ -1,5 +1,5 @@
 # Build image
-FROM jjmerelo/alpine-perl6 as build
+FROM jjmerelo/alpine-raku as build
 
 ARG url_prefix=https://design.raku.org/
 ENV url_prefix=${url_prefix}
