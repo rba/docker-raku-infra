@@ -3,12 +3,11 @@ FROM jjmerelo/alpine-raku as build
 
 ARG url_prefix=https://design.raku.org/
 ENV url_prefix=${url_prefix}
-ARG organization=perl6
 
 ENV build_dir=/tmp/build
 ENV target_dir=/tmp/output
-ENV api_base=https://api.github.com/repos/${organization}
-ENV download_base=https://github.com/${organization}
+ENV api_base=https://api.github.com/repos
+ENV download_base=https://github.com
 
 RUN build_deps=' \
 		perl-file-find-rule \
@@ -26,13 +25,28 @@ RUN build_deps=' \
 	&& zef install --/test Pod::To::HTML
 
 RUN set -x \
-	&& mkdir -p ${build_dir} \
+	&& mkdir -p ${build_dir}
+
+RUN set -x \
 	&& ( \
-		for project in mu roast specs; do \
-			revision=$(curl ${api_base}/${project}/branches/master | jq -r .commit.sha); \
+		for project in mu roast ; do \
+			revision=$(curl ${api_base}/perl6/${project}/branches/master | jq -r .commit.sha); \
 			project_base=${build_dir}/${project}; \
 			zip_file=${project_base}.zip; \
-			wget -O ${zip_file} ${download_base}/${project}/archive/${revision}.zip; \
+			wget -O ${zip_file} ${download_base}/perl6/${project}/archive/${revision}.zip; \
+			unzip -d ${build_dir} -q ${zip_file}; \
+			mv ${project_base}-* ${project_base}; \
+			echo ${revision} | head -c 8 > ${project_base}/.revision; \
+		done \
+	)
+
+RUN set -x \
+	&& ( \
+		for project in old-design-docs; do \
+			revision=$(curl ${api_base}/Raku/${project}/branches/master | jq -r .commit.sha); \
+			project_base=${build_dir}/${project}; \
+			zip_file=${project_base}.zip; \
+			wget -O ${zip_file} ${download_base}/Raku/${project}/archive/${revision}.zip; \
 			unzip -d ${build_dir} -q ${zip_file}; \
 			mv ${project_base}-* ${project_base}; \
 			echo ${revision} | head -c 8 > ${project_base}/.revision; \
@@ -42,12 +56,12 @@ RUN set -x \
 RUN set -x \
 	&& mkdir -p ${target_dir} \
 	&& cd ${build_dir}/mu \
-	&& perl util/smartlinks.pl --out-dir ${target_dir} --dir ${build_dir}/roast --css /perl-with-historical-message.css --line-anchor --pod-dir ${build_dir}/specs \
+	&& perl util/smartlinks.pl --out-dir ${target_dir} --dir ${build_dir}/roast --css /perl-with-historical-message.css --line-anchor --pod-dir ${build_dir}/old-design-docs \
 	&& perl util/podhtm.pl --css /perl-with-historical-message.css --url-prefix ${url_prefix} --url-postfix .html --index --charset=UTF-8 --out ${target_dir}/Differences.html docs/Perl6/Perl5/Differences.pod \
-	&& cp ${build_dir}/specs/html/* ${target_dir}
+	&& cp ${build_dir}/old-design-docs/html/* ${target_dir}
 
 RUN set -x \
-	&& cd ${build_dir}/specs \
+	&& cd ${build_dir}/old-design-docs \
 	&& grep -vE '^(#.*|\s*)$' pod6-files | ( \
 		while read LINE; do \
 			input=$(echo $LINE | cut -d ' ' -f 1); \
