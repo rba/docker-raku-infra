@@ -58,7 +58,7 @@ RUN set -x \
 
 
 # nginx image
-FROM alpine:3.10 as nginx
+FROM alpine:3.11 as nginx
 
 RUN apk add nginx \
 	&& mkdir /run/nginx
