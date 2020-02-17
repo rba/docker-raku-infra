@@ -57,4 +57,17 @@ services:
       - "traefik.http.routers.rakubrew_org.entrypoints=https"
       - "traefik.http.routers.rakubrew_org.tls.certresolver=mycert"
 
+  design_raku_org:
+    build:
+      context: "../design"
+    restart: unless-stopped
+    expose:
+      - "3000"
+    depends_on:
+      - "reverse-proxy"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.design_raku_org.rule=Host(`design.raku.org`)"
+      - "traefik.http.routers.design_raku_org.entrypoints=http"
+
 # end
