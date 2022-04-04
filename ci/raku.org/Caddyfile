@@ -1,0 +1,8 @@
+:5000 {
+    log {
+        output stdout
+    }
+    root * /raku.org/online
+    try_files {path} {path}/ {path}.html =404;
+    file_server
+}
